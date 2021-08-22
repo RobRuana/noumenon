@@ -1,8 +1,8 @@
 extends Node
 
 
-var game: Game
-var player: Player
+var game
+var player
 
 var layers: = {}
 var layer_names: = {}
