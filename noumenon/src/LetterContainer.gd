@@ -94,8 +94,7 @@ func set_letters(value: String):
 			offscreen_pointer.scale = Vector2(0.5, 0.5)
 
 		var path: = "res://assets/images/typewriter/" + letter_name + ".png"
-		var dir: = Directory.new()
-		if not dir.file_exists(path):
+		if not ResourceLoader.exists(path):
 			path = "res://assets/images/typewriter/question.png"
 		letter_sprite.texture = load(path)
 		letter_sprite.name = "%s_%s" % [letter_name, index]
