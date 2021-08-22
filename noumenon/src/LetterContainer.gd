@@ -1,4 +1,3 @@
-tool
 class_name LetterContainer
 extends Node2D
 

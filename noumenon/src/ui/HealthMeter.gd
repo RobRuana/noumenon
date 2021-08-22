@@ -1,4 +1,3 @@
-tool
 class_name HealthMeter
 extends MarginContainer
 

@@ -1,4 +1,3 @@
-tool
 class_name Circle2D
 extends Node2D
 

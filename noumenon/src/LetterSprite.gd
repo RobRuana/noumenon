@@ -1,4 +1,3 @@
-tool
 class_name LetterSprite
 extends KinematicBody2D
 

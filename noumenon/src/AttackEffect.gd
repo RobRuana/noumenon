@@ -1,4 +1,3 @@
-tool
 class_name AttackEffect
 extends Node2D
 
