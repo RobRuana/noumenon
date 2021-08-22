@@ -1,0 +1,72 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/ui_theme.tres" type="Theme" id=1]
+[ext_resource path="res://assets/fonts/font_header.tres" type="DynamicFont" id=2]
+[ext_resource path="res://src/ui/menus/ConfirmQuitScreen.gd" type="Script" id=3]
+[ext_resource path="res://src/ui/controls/BackButton.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/ui/UIScreen.tscn" type="PackedScene" id=69]
+
+[sub_resource type="CanvasItemMaterial" id=1]
+blend_mode = 1
+
+[node name="ConfirmQuitScreen" instance=ExtResource( 69 )]
+theme = ExtResource( 1 )
+script = ExtResource( 3 )
+
+[node name="Margin" type="MarginContainer" parent="." index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 32
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="Margin" index="0"]
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 1888.0
+margin_bottom = 1048.0
+
+[node name="Title" type="Label" parent="Margin/VBox" index="0" groups=[
+"title_glow",
+]]
+material = SubResource( 1 )
+margin_left = 704.0
+margin_right = 1152.0
+margin_bottom = 118.0
+size_flags_horizontal = 4
+custom_fonts/font = ExtResource( 2 )
+text = "Quit Game?"
+align = 1
+
+[node name="HBox" type="HBoxContainer" parent="Margin/VBox" index="1"]
+margin_left = 723.0
+margin_top = 537.0
+margin_right = 1132.0
+margin_bottom = 600.0
+size_flags_horizontal = 6
+size_flags_vertical = 6
+custom_constants/separation = 200
+
+[node name="BackButton" parent="Margin/VBox/HBox" index="0" groups=[
+"confirm_quit_screen_focus_box",
+] instance=ExtResource( 5 )]
+margin_right = 90.0
+margin_bottom = 63.0
+size_flags_horizontal = 6
+text = "No"
+screen = NodePath("../../../..")
+
+[node name="QuitButton" type="Button" parent="Margin/VBox/HBox" index="1" groups=[
+"confirm_quit_screen_focus_box",
+]]
+margin_left = 290.0
+margin_right = 409.0
+margin_bottom = 63.0
+size_flags_horizontal = 6
+text = "Yes"
+
+[connection signal="button_up" from="Margin/VBox/HBox/QuitButton" to="." method="_on_quit_button_up"]

@@ -1,0 +1,129 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/fonts/font_title.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/ui_theme.tres" type="Theme" id=2]
+[ext_resource path="res://assets/fonts/font_byline.tres" type="DynamicFont" id=3]
+[ext_resource path="res://src/ui/menus/PauseScreen.gd" type="Script" id=4]
+[ext_resource path="res://src/ui/UIScreen.tscn" type="PackedScene" id=69]
+
+[node name="PauseScreen" instance=ExtResource( 69 )]
+mouse_filter = 1
+theme = ExtResource( 2 )
+script = ExtResource( 4 )
+
+[node name="Margin" type="MarginContainer" parent="." index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+custom_constants/margin_right = 32
+custom_constants/margin_top = 32
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="Margin" index="0"]
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 1888.0
+margin_bottom = 1048.0
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox" index="0"]
+margin_left = 364.0
+margin_top = 77.0
+margin_right = 1491.0
+margin_bottom = 390.0
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
+[node name="Title" type="Label" parent="Margin/VBox/Margin" index="0" groups=[
+"title_glow",
+]]
+margin_right = 1127.0
+margin_bottom = 313.0
+size_flags_horizontal = 4
+size_flags_vertical = 6
+custom_fonts/font = ExtResource( 1 )
+text = "NOUMENON"
+align = 1
+
+[node name="Byline" type="Label" parent="Margin/VBox/Margin/Title" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 995.0
+margin_top = 282.0
+margin_right = -10.0
+margin_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 8
+size_flags_vertical = 8
+custom_fonts/font = ExtResource( 3 )
+text = "By Rob Ruana"
+align = 2
+valign = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxCenter" type="VBoxContainer" parent="Margin/VBox" index="1"]
+margin_left = 796.0
+margin_top = 476.0
+margin_right = 1060.0
+margin_bottom = 752.0
+size_flags_horizontal = 6
+size_flags_vertical = 2
+
+[node name="ContinueButton" type="Button" parent="Margin/VBox/VBoxCenter" index="0" groups=[
+"pause_screen_focus_box",
+]]
+margin_right = 264.0
+margin_bottom = 63.0
+size_flags_horizontal = 4
+text = "Continue"
+
+[node name="ControlsButton" type="Button" parent="Margin/VBox/VBoxCenter" index="1" groups=[
+"pause_screen_focus_box",
+]]
+margin_top = 71.0
+margin_right = 264.0
+margin_bottom = 134.0
+size_flags_horizontal = 4
+text = "Controls"
+
+[node name="AudioButton" type="Button" parent="Margin/VBox/VBoxCenter" index="2" groups=[
+"pause_screen_focus_box",
+]]
+margin_left = 43.0
+margin_top = 142.0
+margin_right = 220.0
+margin_bottom = 205.0
+size_flags_horizontal = 4
+text = "Audio"
+
+[node name="CreditsButton" type="Button" parent="Margin/VBox/VBoxCenter" index="3" groups=[
+"pause_screen_focus_box",
+]]
+margin_left = 14.0
+margin_top = 213.0
+margin_right = 249.0
+margin_bottom = 276.0
+size_flags_horizontal = 4
+text = "Credits"
+
+[node name="QuitButton" type="Button" parent="Margin/VBox" index="2" groups=[
+"pause_screen_focus_box",
+]]
+margin_left = 854.0
+margin_top = 953.0
+margin_right = 1002.0
+margin_bottom = 1016.0
+size_flags_horizontal = 4
+text = "Quit"
+
+[connection signal="button_up" from="Margin/VBox/VBoxCenter/ContinueButton" to="." method="_on_continue_button_up"]
+[connection signal="button_up" from="Margin/VBox/VBoxCenter/ControlsButton" to="." method="_on_controls_button_up"]
+[connection signal="button_up" from="Margin/VBox/VBoxCenter/AudioButton" to="." method="_on_audio_button_up"]
+[connection signal="button_up" from="Margin/VBox/VBoxCenter/CreditsButton" to="." method="_on_credits_button_up"]
+[connection signal="button_up" from="Margin/VBox/QuitButton" to="." method="_on_quit_button_up"]
