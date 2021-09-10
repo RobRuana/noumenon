@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=35 format=2]
 
 [ext_resource path="res://src/Game.gd" type="Script" id=1]
 [ext_resource path="res://src/Player.tscn" type="PackedScene" id=2]
@@ -6,13 +6,11 @@
 [ext_resource path="res://assets/images/impact/under_control.png" type="Texture" id=4]
 [ext_resource path="res://assets/audio/win_success_01.wav" type="AudioStream" id=5]
 [ext_resource path="res://assets/audio/win_transition_01.wav" type="AudioStream" id=6]
-[ext_resource path="res://src/CameraShake.gd" type="Script" id=7]
-[ext_resource path="res://src/ui/menus/PauseController.tscn" type="PackedScene" id=8]
-[ext_resource path="res://src/ui/HealthMeter.tscn" type="PackedScene" id=9]
+[ext_resource path="res://src/utils/PlayerCamera.gd" type="Script" id=7]
+[ext_resource path="res://src/HUD.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/images/paper.png" type="Texture" id=10]
-[ext_resource path="res://src/Fader.tscn" type="PackedScene" id=11]
-[ext_resource path="res://src/ui/menus/StartController.tscn" type="PackedScene" id=12]
-[ext_resource path="res://src/RandomAudioStreamPlayer.gd" type="Script" id=13]
+[ext_resource path="res://src/utils/Fader.gd" type="Script" id=11]
+[ext_resource path="res://src/utils/RandomAudioStreamPlayer.gd" type="Script" id=13]
 [ext_resource path="res://assets/audio/typewriter_carriage_return_01.wav" type="AudioStream" id=16]
 [ext_resource path="res://assets/audio/typewriter_bell_01.wav" type="AudioStream" id=17]
 [ext_resource path="res://assets/audio/cat_meow_long_01.wav" type="AudioStream" id=18]
@@ -21,7 +19,7 @@
 [ext_resource path="res://assets/images/impact/of.png" type="Texture" id=21]
 [ext_resource path="res://assets/audio/death_transition_01.wav" type="AudioStream" id=22]
 [ext_resource path="res://assets/audio/title_01.wav" type="AudioStream" id=23]
-[ext_resource path="res://assets/ui_theme.tres" type="Theme" id=24]
+[ext_resource path="res://assets/theme/ui_theme.tres" type="Theme" id=24]
 [ext_resource path="res://assets/audio/death_breath_01.wav" type="AudioStream" id=25]
 [ext_resource path="res://src/Level.tscn" type="PackedScene" id=26]
 
@@ -212,7 +210,7 @@ tracks/13/keys = {
 [sub_resource type="Animation" id=2]
 length = 0.001
 tracks/0/type = "value"
-tracks/0/path = NodePath("UILayer/UI:modulate")
+tracks/0/path = NodePath("HUDLayer/HUD:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false
@@ -265,7 +263,7 @@ tracks/2/keys = {
 "times": PoolRealArray( 0.5 )
 }
 tracks/3/type = "value"
-tracks/3/path = NodePath("UILayer/UI:modulate")
+tracks/3/path = NodePath("HUDLayer/HUD:modulate")
 tracks/3/interp = 2
 tracks/3/loop_wrap = true
 tracks/3/imported = false
@@ -425,7 +423,7 @@ tracks/1/keys = {
 "values": [ 0.0 ]
 }
 tracks/2/type = "value"
-tracks/2/path = NodePath("UILayer/UI:modulate")
+tracks/2/path = NodePath("HUDLayer/HUD:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/imported = false
@@ -683,30 +681,22 @@ _data = {
 }
 
 [sub_resource type="StyleBoxFlat" id=7]
-bg_color = Color( 1, 1, 1, 0 )
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color( 1, 1, 1, 1 )
-
-[sub_resource type="StyleBoxFlat" id=8]
 bg_color = Color( 1, 1, 1, 1 )
 
-[sub_resource type="InputEventAction" id=9]
+[sub_resource type="InputEventAction" id=8]
 action = "ui_accept"
 
-[sub_resource type="ShortCut" id=10]
-shortcut = SubResource( 9 )
+[sub_resource type="ShortCut" id=9]
+shortcut = SubResource( 8 )
 
-[sub_resource type="StyleBoxFlat" id=11]
+[sub_resource type="StyleBoxFlat" id=10]
 bg_color = Color( 1, 1, 1, 1 )
 
-[sub_resource type="InputEventAction" id=12]
+[sub_resource type="InputEventAction" id=11]
 action = "ui_accept"
 
-[sub_resource type="ShortCut" id=13]
-shortcut = SubResource( 12 )
+[sub_resource type="ShortCut" id=12]
+shortcut = SubResource( 11 )
 
 [node name="Game" type="Node2D"]
 pause_mode = 2
@@ -719,9 +709,10 @@ anims/intro = SubResource( 3 )
 anims/reset = SubResource( 4 )
 anims/win = SubResource( 5 )
 
-[node name="Fader" parent="." instance=ExtResource( 11 )]
-
 [node name="Tween" type="Tween" parent="."]
+
+[node name="Fader" type="Tween" parent="."]
+script = ExtResource( 11 )
 
 [node name="AudioEffect1" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 16 )
@@ -818,66 +809,10 @@ drag_margin_bottom = 0.3
 editor_draw_drag_margin = true
 script = ExtResource( 7 )
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="HUDLayer" type="CanvasLayer" parent="."]
 layer = 40
 
-[node name="UI" type="MarginContainer" parent="UILayer"]
-modulate = Color( 1, 1, 1, 0 )
-margin_right = 1920.0
-margin_bottom = 1080.0
-custom_constants/margin_right = 20
-custom_constants/margin_top = 20
-custom_constants/margin_left = 20
-custom_constants/margin_bottom = 20
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="HealthMeter" parent="UILayer/UI" instance=ExtResource( 9 )]
-anchor_right = 0.0
-anchor_bottom = 0.0
-margin_left = 20.0
-margin_top = 20.0
-margin_right = 20.0
-margin_bottom = 20.0
-
-[node name="ZoomMargin" type="MarginContainer" parent="UILayer/UI"]
-visible = false
-margin_left = 20.0
-margin_top = 988.0
-margin_right = 1900.0
-margin_bottom = 1060.0
-size_flags_vertical = 8
-custom_constants/margin_right = 480
-custom_constants/margin_top = 0
-custom_constants/margin_left = 480
-custom_constants/margin_bottom = 64
-
-[node name="ZoomPanel" type="PanelContainer" parent="UILayer/UI/ZoomMargin"]
-margin_left = 480.0
-margin_right = 1400.0
-margin_bottom = 8.0
-size_flags_vertical = 8
-custom_styles/panel = SubResource( 7 )
-
-[node name="ZoomMeter" type="ProgressBar" parent="UILayer/UI/ZoomMargin/ZoomPanel"]
-modulate = Color( 0, 0, 0, 1 )
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 916.0
-margin_bottom = 20.0
-rect_min_size = Vector2( 0, 16 )
-size_flags_horizontal = 3
-size_flags_vertical = 8
-theme = ExtResource( 24 )
-value = 100.0
-percent_visible = false
-
-[node name="LetterContainer" parent="UILayer/UI" instance=ExtResource( 3 )]
-position = Vector2( 960, 44 )
-scale = Vector2( 0.5, 0.5 )
-is_static = true
-default_modulate = Color( 0.501961, 0.501961, 0.501961, 0.501961 )
+[node name="HUD" parent="HUDLayer" instance=ExtResource( 9 )]
 
 [node name="ScreenLayer" type="CanvasLayer" parent="."]
 layer = 80
@@ -897,7 +832,7 @@ margin_right = 1920.0
 margin_bottom = 1080.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_styles/panel = SubResource( 8 )
+custom_styles/panel = SubResource( 7 )
 
 [node name="TitleContainer" type="Node2D" parent="ScreenLayer/DeathScreen"]
 position = Vector2( 960, 336 )
@@ -948,7 +883,7 @@ size_flags_vertical = 2
 theme = ExtResource( 24 )
 disabled = true
 shortcut_in_tooltip = false
-shortcut = SubResource( 10 )
+shortcut = SubResource( 9 )
 text = "Retry"
 flat = true
 
@@ -967,7 +902,7 @@ margin_right = 1920.0
 margin_bottom = 1080.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_styles/panel = SubResource( 11 )
+custom_styles/panel = SubResource( 10 )
 
 [node name="TitleContainer" type="Node2D" parent="ScreenLayer/WinScreen"]
 position = Vector2( 960, 336 )
@@ -1000,14 +935,9 @@ size_flags_vertical = 2
 theme = ExtResource( 24 )
 disabled = true
 shortcut_in_tooltip = false
-shortcut = SubResource( 13 )
+shortcut = SubResource( 12 )
 text = "Next Level"
 flat = true
-
-[node name="PauseController" parent="ScreenLayer" instance=ExtResource( 8 )]
-visible = false
-
-[node name="StartController" parent="ScreenLayer" instance=ExtResource( 12 )]
 
 [connection signal="button_up" from="ScreenLayer/DeathScreen/Buttons/RetryButton" to="." method="_on_retry_button_up"]
 [connection signal="button_up" from="ScreenLayer/WinScreen/Buttons/NextLevelButton" to="." method="_on_next_level_button_up"]

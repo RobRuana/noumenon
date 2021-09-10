@@ -1,5 +1,8 @@
 extends Node2D
 
+
+export var effect_2D_max_distance: float = 480.0
+
 onready var tween: = $Tween
 onready var music_players: = [$MusicPlayer0, $MusicPlayer1]
 var music_player_index: = 0
@@ -19,8 +22,6 @@ func _ready():
 	spectrum = AudioServer.get_bus_effect_instance(1, 0)
 	$MusicPlayer0.volume_db = 0.0
 	$MusicPlayer1.volume_db = -80.0
-	Settings.once_loaded(self, "_on_settings_loaded")
-	Settings.connect("setting_changed", self, "_on_setting_changed")
 
 
 func get_music_player_next_index() -> int:
@@ -33,6 +34,20 @@ func get_music_player() -> AudioStreamPlayer:
 
 func get_music_player_next() -> AudioStreamPlayer:
 	return music_players[self.music_player_next_index]
+
+
+func play_effect(stream: AudioStream, volume_db: float = 0.0, pitch_scale: float = 1.0, delay: float = 0.0):
+	var audio_player: = AudioStreamPlayer.new()
+	audio_player.stream = stream
+	play_audio_player(audio_player, volume_db, pitch_scale, delay)
+
+
+func play_effect_2D(stream: AudioStream, audio_position: Vector2, volume_db: float = 0.0, pitch_scale: float = 1.0, delay: float = 0.0):
+	var audio_player: = AudioStreamPlayer2D.new()
+	audio_player.max_distance = effect_2D_max_distance
+	audio_player.stream = stream
+	audio_player.position = audio_position
+	play_audio_player(audio_player, volume_db, pitch_scale, delay)
 
 
 func play_autotune_effect(stream: AudioStream, volume_db: float = 0.0):
@@ -54,17 +69,19 @@ func play_autotune_effect(stream: AudioStream, volume_db: float = 0.0):
 	play_effect(stream, volume_db, pitch_scale)
 
 
-func play_effect(stream: AudioStream, volume_db: float = 0.0, pitch_scale: float = 1.0, delay: float = 0.0):
-	if not stream:
+func play_audio_player(audio_player, volume_db: float = 0.0, pitch_scale: float = 1.0, delay: float = 0.0):
+	if not audio_player or not audio_player.stream:
 		return
 
-	var audio_player: = AudioStreamPlayer.new()
-	audio_player.stream = stream
+	if delay > 0.0:
+		yield(get_tree().create_timer(delay), "timeout")
+
+	if not Settings.is_initialized:
+		yield(Settings, "initialized")
+
 	audio_player.volume_db = volume_db
 	audio_player.pitch_scale = pitch_scale
 	audio_player.bus = "Effects"
-	if delay > 0.0:
-		yield(get_tree().create_timer(delay), "timeout")
 	add_child(audio_player)
 	audio_player.connect("finished", audio_player, "queue_free", [], CONNECT_ONESHOT)
 	audio_player.play()
@@ -74,6 +91,9 @@ func play_music(stream: AudioStream, cross_fade: float = 1.0, fade_out: float = 
 	if self.music_player.playing and self.music_player.stream == stream:
 		# already playing requested stream
 		return
+
+	if not Settings.is_initialized:
+		yield(Settings, "initialized")
 
 	if self.music_player.playing and (cross_fade > 0.0 or fade_in > 0.0 or fade_out > 0.0):
 		self.music_player_next.stop()
@@ -136,20 +156,3 @@ func fade_music(fade_out: float = 2.0):
 		tween.start()
 	else:
 		self.music_player.stop()
-
-
-func _on_settings_loaded():
-	for key in Settings.get_section_keys("audio_volume"):
-		_on_setting_changed("audio_volume", key, Settings.get_value("audio_volume", key))
-
-
-func _on_setting_changed(section, key, value, old_value = null):
-	if section == "audio_volume":
-		var audio_bus_index: = AudioServer.get_bus_index(key)
-		if audio_bus_index >= 0:
-			var volume: = max(linear2db(value / 100.0), -80.0)
-#			print(audio_bus_index, " volume: ", value, " (", volume, " db)")
-			AudioServer.set_bus_volume_db(audio_bus_index, volume)
-			# To do the reverse:
-			# var volume: = AudioServer.get_bus_volume_db(audio_bus_index)
-			# var value: = round(min(db2linear(volume) * 100.0, 100.0))

@@ -5,7 +5,7 @@ extends Node2D
 signal intro_completed
 
 const LETTER_SPRITE: PackedScene = preload("res://src/LetterSprite.tscn")
-const OFFSCREEN_POINTER: PackedScene = preload("res://src/OffscreenPointer.tscn")
+const OFFSCREEN_POINTER: PackedScene = preload("res://src/utils/OffscreenPointer.tscn")
 const TYPEWRITER_BELL_AUDIO: AudioStream = preload("res://assets/audio/typewriter_bell_01.wav")
 const TYPEWRITER_CARRIAGE_RETURN_AUDIO: AudioStream = preload("res://assets/audio/typewriter_carriage_return_01.wav")
 

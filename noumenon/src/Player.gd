@@ -145,7 +145,7 @@ func _process_player_input(delta: float):
 	var wish_velocity: Vector2 = Vector2.ZERO
 
 	if not is_disabled():
-		var move: = InputCircular.get_move()
+		var move: = InputCircular.get_action_strength("move")
 		var multiplier: float = 1.0
 		if not Math.is_zero_approx_v(move) and Input.is_action_pressed("zoom") and not is_zoom_recovery:
 			self.zoom_countdown = max(zoom_countdown - delta, 0.0)

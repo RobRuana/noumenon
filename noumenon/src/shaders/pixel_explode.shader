@@ -200,6 +200,8 @@ void vertex() {
 			distance_vector * dot_product * initial_linear_velocity * mix(1.0, rand_from_seed(alt_seed), initial_linear_velocity_random)
 			+ (EMISSION_TRANSFORM * vec4(sprite_velocity, 0.0, 0.0)).xy
 		);
+		float angle = 0.3926990817 * mix(0.0, angle_rand * 2.0 - 1.0, initial_angle_random);
+		velocity = vec2(velocity.x * cos(angle) - velocity.y * sin(angle), velocity.x * sin(angle) + velocity.y * cos(angle));
 		VELOCITY = (EMISSION_TRANSFORM * vec4(velocity, 0.0, 0.0)).xyz;
 		// ignore transparent pixels
 		ACTIVE = (sprite_color.a != 0.0);

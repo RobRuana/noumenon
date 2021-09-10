@@ -1,56 +1,65 @@
 extends Node
 
-const move_threshold_low: float = 0.15
-const move_threshold_low_squared: float = move_threshold_low * move_threshold_low
-const move_threshold_high: float = 0.65
-const move_threshold_high_squared: float = move_threshold_high * move_threshold_high
-const move_threshold_range: float = move_threshold_high - move_threshold_low
-const move_threshold_range_inverse: float = 1.0 / move_threshold_range
+const threshold_low: float = 0.1
+const threshold_low_squared: float = threshold_low * threshold_low
+const threshold_high: float = 0.6
+const threshold_high_squared: float = threshold_high * threshold_high
+const threshold_range: float = threshold_high - threshold_low
+const threshold_range_inverse: float = 1.0 / threshold_range
 
 
-# =============================================================
-# Move Functions
-# =============================================================
-
-func get_move() -> Vector2:
-	var direction: = get_move_raw()
+func get_action_strength(action: String = "move") -> Vector2:
+	var strength: Vector2
+	var direction: = get_raw(action)
 	var length_squared: = direction.length_squared()
-	if length_squared < move_threshold_low_squared:
+	if length_squared <= threshold_low_squared:
 		return Vector2.ZERO
-	elif length_squared >= move_threshold_high_squared:
-		return direction.normalized()
-	return direction.normalized() * (sqrt(length_squared) - move_threshold_low) * move_threshold_range_inverse
+	elif length_squared >= threshold_high_squared:
+		strength = direction.normalized()
+	else:
+		strength = direction.normalized() * (sqrt(length_squared) - threshold_low) * threshold_range_inverse
+
+	if Math.is_zero_approx_v(strength):
+		return Vector2.ZERO
+	return strength
 
 
-func get_move_raw() -> Vector2:
-	return Vector2(get_move_x_raw(), get_move_y_raw())
+func get_action_direction(action: String = "move") -> Vector2:
+	var direction: = get_raw(action)
+	if direction.length_squared() <= threshold_low_squared:
+		return Vector2.ZERO
+	return direction.normalized()
 
 
-func has_move() -> bool:
-	return get_move_raw().length_squared() >= move_threshold_low_squared
+func get_raw(action: String = "move") -> Vector2:
+	return Vector2(get_x_raw(action), get_y_raw(action))
 
 
-func get_move_x() -> float:
-	return get_move().x
+func has_move(action: String = "move") -> bool:
+	return get_raw(action).length_squared() > threshold_low_squared
 
 
-func get_move_x_raw() -> float:
-	return Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+func get_x(action: String = "move") -> float:
+	return get_action_strength(action).x
 
 
-func has_move_x() -> bool:
-	var direction: Vector2 = get_move_raw()
-	return direction.x != 0.0 and direction.length_squared() >= move_threshold_low_squared
+func get_x_raw(action: String = "move") -> float:
+	return Input.get_action_strength(action + "_right") - Input.get_action_strength(action + "_left")
 
 
-func get_move_y() -> float:
-	return get_move().y
+func has_x(action: String = "move") -> bool:
+	var direction: Vector2 = get_raw()
+	return not is_zero_approx(direction.x) and direction.length_squared() >= threshold_low_squared
 
 
-func get_move_y_raw() -> float:
-	return Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
+func get_y(action: String = "move") -> float:
+	return get_action_strength(action).y
 
 
-func has_move_y() -> bool:
-	var direction: Vector2 = get_move_raw()
-	return direction.x != 0.0 and direction.length_squared() >= move_threshold_low_squared
+func get_y_raw(action: String = "move") -> float:
+	return Input.get_action_strength(action + "_down") - Input.get_action_strength(action + "_up")
+
+
+func has_y(action: String = "move") -> bool:
+	var direction: Vector2 = get_raw()
+	return not is_zero_approx(direction.y) and direction.length_squared() >= threshold_low_squared

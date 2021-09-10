@@ -1,4 +1,7 @@
 build/
+resources/marketing
+resources/letters/impact
+resources/letters/typewriter
 
 # Godot-specific ignores
 .import/

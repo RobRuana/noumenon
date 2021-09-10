@@ -4,20 +4,12 @@ extends Node2D
 
 const BACKGROUND_MUSIC: AudioStream = preload("res://assets/audio/background_music.mp3")
 const WIN_SUCCESS_AUDIO: AudioStream = preload("res://assets/audio/win_success_01.wav")
+const PAUSE_CONTROLLER: PackedScene = preload("res://src/ui/PauseController.tscn")
 
 onready var player: Player = $PlayerContainer/Player
 
 export var chapter_index: int = 0
 export var level_index: int = 0
-export var LEVEL_LETTERS: PoolStringArray = [
-	"Growth",
-	"Godot",
-	"Wild",
-	"Game Jam",
-	"Uncontrollable",
-	"Noumenon",
-	"WIN!WIN!WIN!",
-]
 
 export var state: int = 0 setget set_state
 var first_run: bool = true
@@ -31,31 +23,18 @@ func set_state(value: int):
 
 
 func _ready():
-	if OS.is_debug_build():
-		seed(12345)
-	else:
-		randomize()
-
 	Global.game = self
 
-	$ScreenLayer/PauseController.disabled = true
-	$ScreenLayer/PauseController.connect("continue_game", self, "_on_pause_continue_game")
-	$ScreenLayer/PauseController.connect("quit_game", self, "_on_quit_button_up")
-
-	$ScreenLayer/StartController.disabled = true
-	$ScreenLayer/StartController.connect("continue_game", self, "_on_start_game")
-	$ScreenLayer/StartController.connect("quit_game", self, "_on_quit_button_up")
-
 	Events.connect("game_state_changed", self, "_on_game_state_changed")
-	Events.connect("player_health_changed", self, "_on_player_health_changed")
-	Events.connect("player_zoom_changed", self, "_on_player_zoom_changed")
-	Events.connect("player_zoom_recovery", self, "_on_player_zoom_recovery")
 	Events.connect("player_death", self, "_on_player_death")
-	Events.connect("letter_inside_goal", self, "_on_letter_inside_goal")
 	Events.connect("level_completed", self, "_on_level_completed")
 	Events.connect("add_effects_node", self, "add_effects_node")
 
-	show_controller($ScreenLayer/StartController)
+	Letters.once_initialized(self, "_on_letters_initialized")
+
+
+func _on_letters_initialized():
+	start()
 	yield(GlobalOverlay.fade_to_transparent(1.0), "completed")
 
 
@@ -69,14 +48,9 @@ func add_effects_node(node: Node, autoremove: bool = false, autoremove_delay: fl
 		Global.safe_queue_free_remove_child(self, node)
 
 
-func _on_start_game():
-	hide_controller($ScreenLayer/StartController)
-	start()
-
-
 func start():
 	yield(reset(), "completed")
-	Settings.once_loaded(self, "do_start")
+	Settings.once_initialized(self, "do_start")
 
 
 func do_start():
@@ -112,7 +86,7 @@ func reset():
 	$LevelContainer/Level/LetterContainer.letter_aggro_speed = get_letter_aggro_speed()
 	$LevelContainer/Level/LetterContainer.letters = letters
 	$ScreenLayer/DeathScreen/LetterContainer.letters = letters
-	$UILayer/UI/LetterContainer.letters = letters
+	$HUDLayer/HUD/LetterContainer.letters = letters
 
 	if $AnimationPlayer.is_playing():
 		yield($AnimationPlayer, "animation_finished")
@@ -125,7 +99,7 @@ func get_letter_aggro_speed() -> float:
 	level 5, speed == 300.0
 	Thereafter, speed asymptotically approaches player speed (450.0)
 	"""
-	var level: float = float((chapter_index * LEVEL_LETTERS.size()) + level_index)
+	var level: float = float((chapter_index * Letters.LEVEL_LETTERS.size()) + level_index)
 	var letter_aggro_default: float = 300.0
 	var speed_min: float = 100.0
 	var speed_max: float = $PlayerContainer/Player.speed
@@ -136,7 +110,7 @@ func get_letter_aggro_speed() -> float:
 
 
 func get_letters() -> String:
-	var letters: String = LEVEL_LETTERS[level_index]
+	var letters: String = Letters.LEVEL_LETTERS[level_index]
 	if chapter_index > 0:
 		letters += "+".repeat(chapter_index)
 	return letters
@@ -158,32 +132,6 @@ func _on_game_state_changed(value: int, old_value: int):
 	$PlayerContainer/Player/PlayerCamera.current = value != Const.GameState.INTRO
 
 
-func _on_player_health_changed(_player: Player, value: int, old_value: int):
-	$UILayer/UI/HealthMeter.health = value
-
-
-func _on_player_zoom_changed(_player: Player, value: float, old_value: float):
-	$UILayer/UI/ZoomMargin/ZoomPanel/ZoomMeter.value = value
-	if is_equal_approx(value, 100.0) and not Input.is_action_pressed("zoom"):
-		$Fader.fade_to_transparent($UILayer/UI/ZoomMargin, 0.25)
-	elif is_equal_approx(old_value, 100.0):
-		$Fader.fade_to_opaque($UILayer/UI/ZoomMargin, 0.25)
-
-
-func _on_player_zoom_recovery(_player: Player, value: bool):
-	if value:
-		$UILayer/UI/ZoomMargin/ZoomPanel/ZoomMeter.modulate = Color(0.8, 0.2, 0.2, 1.0)
-	else:
-		$Tween.remove($UILayer/UI/ZoomMargin/ZoomPanel/ZoomMeter)
-		$Tween.interpolate_property($UILayer/UI/ZoomMargin/ZoomPanel/ZoomMeter, "modulate", null, Color.black, 0.25, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
-		$Tween.start()
-
-
-func _on_letter_inside_goal(letter: LetterSprite):
-	var child = $UILayer/UI/LetterContainer.get_letter(letter.character_index)
-	child.modulate = Color(0.0, 0.8, 0.0, 1.0)
-
-
 func _on_player_death(_player: Player):
 	self.state = Const.GameState.DEATH
 	level_index = 0
@@ -195,7 +143,7 @@ func _on_player_death(_player: Player):
 func _on_level_completed(level):
 	self.state = Const.GameState.WIN
 	level_index += 1
-	if level_index >= LEVEL_LETTERS.size():
+	if level_index >= Letters.LEVEL_LETTERS.size():
 		level_index = 0
 		chapter_index += 1
 	$AnimationPlayer.play("win")
@@ -218,30 +166,19 @@ func _on_next_level_button_up():
 	start()
 
 
-func _on_pause_continue_game():
-	hide_controller($ScreenLayer/PauseController)
-
-
 func _unhandled_input(event: InputEvent):
 	if not get_tree().paused and event.is_action_pressed("pause"):
 		if state == Const.GameState.INTRO or state == Const.GameState.PLAYING:
-			show_controller($ScreenLayer/PauseController)
+			push_controller(PAUSE_CONTROLLER)
 
 
-func show_controller(controller):
+func push_controller(scene):
 	get_tree().set_input_as_handled()
 	get_tree().paused = true
-	controller.will_show_controller()
-	controller.reset_focus()
-	yield($Fader.fade_to_opaque(controller), "completed")
-	controller.disabled = false
-	controller.did_show_controller()
+	var controller: UIController = yield(SceneManager.push_controller(scene), "completed")
+	controller.connect("pop_controller_completed", self, "_on_pop_controller_completed", [], CONNECT_ONESHOT)
 
 
-func hide_controller(controller):
+func _on_pop_controller_completed(controller):
 	if get_tree().paused:
-		controller.disabled = true
-		controller.will_hide_controller()
-		yield($Fader.fade_to_transparent(controller), "completed")
 		get_tree().paused = false
-		controller.did_hide_controller()

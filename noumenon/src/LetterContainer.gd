@@ -2,8 +2,8 @@ class_name LetterContainer
 extends Node2D
 
 const LETTER_SPRITE: PackedScene = preload("res://src/LetterSprite.tscn")
-const OFFSCREEN_POINTER: PackedScene = preload("res://src/OffscreenPointer.tscn")
-const SPRITE_PARTICLES = preload("res://src/SpriteParticles.tscn")
+const OFFSCREEN_POINTER: PackedScene = preload("res://src/utils/OffscreenPointer.tscn")
+const SPRITE_PARTICLES = preload("res://src/utils/SpriteParticles.tscn")
 
 export var is_static: bool = false
 export var letters: String = "" setget set_letters
@@ -13,45 +13,6 @@ export var default_modulate: Color = Color.white
 
 var is_ready: bool = false
 var goal: Goal
-
-
-const LETTER_NAMES: Dictionary = {
-	"?": "question",
-	"+": "plus",
-	"=": "equals",
-	"-": "dash",
-	" ": "dash",
-	"_": "underscore",
-	".": "period",
-	"!": "exclamation",
-	"$": "dollar",
-	"#": "hash",
-	"@": "at",
-	"%": "percent",
-	"^": "caret",
-	"~": "tilde",
-	"`": "backtick",
-	"/": "slash",
-	"\\\\": "backslash",
-	"&": "ampersand",
-	"*": "asterisk",
-	"(": "paren_l",
-	")": "paren_r",
-	"{": "brace_l",
-	"}": "brace_r",
-	"[": "bracket_l",
-	"]": "bracket_r",
-	"0": "0",
-	"1": "1",
-	"2": "2",
-	"3": "3",
-	"4": "4",
-	"5": "5",
-	"6": "6",
-	"7": "7",
-	"8": "8",
-	"9": "9",
-}
 
 
 func set_letters(value: String):
@@ -64,28 +25,24 @@ func set_letters(value: String):
 		remove_child(child)
 		child.queue_free()
 
+	var child_rects: Array = []
 	var index: int = 0
 	for letter in letters:
 		letter = letter.replace(" ", "_").strip_edges()
 		if letter.empty():
 			continue
 
-		var letter_name: String
-		if letter in LETTER_NAMES:
-			letter_name = LETTER_NAMES[letter]
-		else:
-			var is_upper: bool = letter == letter.to_upper()
-			letter_name = letter.to_lower() + "_" + ("upper" if is_upper else "lower")
-
 		var letter_sprite
 		if is_static:
 			letter_sprite = Sprite.new()
+			letter_sprite.texture = Letters.get_letter_texture(letter)
 		else:
 			letter_sprite = LETTER_SPRITE.instance()
 			letter_sprite.character_index = index
 			letter_sprite.goal = goal
 			letter_sprite.visible = false
 			letter_sprite.aggro_speed = letter_aggro_speed
+			letter_sprite.letter = letter
 
 			var offscreen_pointer: OffscreenPointer = OFFSCREEN_POINTER.instance()
 			letter_sprite.add_child(offscreen_pointer)
@@ -93,23 +50,19 @@ func set_letters(value: String):
 			offscreen_pointer.color = Color(1.0, 1.0, 1.0, 0.5)
 			offscreen_pointer.scale = Vector2(0.5, 0.5)
 
-		var path: = "res://assets/images/typewriter/" + letter_name + ".png"
-		if not ResourceLoader.exists(path):
-			path = "res://assets/images/typewriter/question.png"
-		letter_sprite.texture = load(path)
-		letter_sprite.name = "%s_%s" % [letter_name, index]
+		letter_sprite.name = "%s_%s" % [Letters.get_letter_name(letter), index]
 		letter_sprite.modulate = default_modulate
 		add_child(letter_sprite)
 
+		child_rects.push_back(Letters.get_letter_rect(letter))
 		index += 1
 
 	var child_sizes: = []
 	var letter_count: = get_child_count()
 	var total_width: float = kerning * float(letter_count - 1) * scale.x
-	for child in get_children():
-		var rect: Rect2 = child.texture.get_data().get_used_rect() if is_static else child.rect
-		child_sizes.append(rect.size * scale.x)
-		total_width += rect.size.x * scale.x
+	for child_rect in child_rects:
+		child_sizes.append(child_rect.size * scale.x)
+		total_width += child_rect.size.x * scale.x
 
 	var cursor: Vector2 = global_position - Vector2(total_width * 0.5, 0.0)
 	for i in range(get_child_count()):

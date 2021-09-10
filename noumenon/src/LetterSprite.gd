@@ -7,10 +7,10 @@ const INSIDE_GOAL_AUDIO: AudioStream = preload("res://assets/audio/letter_inside
 const EMIT_AUDIO: AudioStream = preload("res://assets/audio/typewriter_return_01.wav")
 const BACKSPACE_AUDIO: AudioStream = preload("res://assets/audio/typewriter_backspace_01.wav")
 
+export var letter: String = "" setget set_letter
 export var state: int = 0 setget set_state
 export var emit: bool = false setget set_emit
 export var backspace: bool = false setget set_backspace
-export var texture: Texture setget set_texture
 
 export var speed: = 100.0
 export var aggro_speed: = 300.0
@@ -75,27 +75,27 @@ func set_backspace(value: bool):
 			AudioPlayer.play_effect(BACKSPACE_AUDIO, 1.0, pitch)
 
 
-func set_texture(value: Texture):
-	texture = value
-	if has_node("Sprite"):
-		$Sprite.texture = value
+func set_letter(value: String):
+	letter = value.replace(" ", "_").strip_edges()
+	if not letter.empty():
+		if has_node("Sprite"):
+			$Sprite.texture = Letters.get_letter_texture(letter)
 
-	if has_node("CollisionShape2D") and texture:
-		var image: Image = texture.get_data()
-		rect = image.get_used_rect()
-		radius = max(rect.size.x, rect.size.y) * 0.5
-		var shape: = CapsuleShape2D.new()
-		var min_dimension: = min(rect.size.x, rect.size.y)
-		shape.radius = min_dimension * 0.5
-		if rect.size.y > rect.size.x:
-			shape.height = max(rect.size.y - min_dimension, 0.0)
-		else:
-			shape.height = max(rect.size.x - min_dimension, 0.0)
-			$CollisionShape2D.rotation_degrees = 90.0
-		$CollisionShape2D.shape = shape
-		$CollisionShape2D.position = rect.position + (rect.size * 0.5) - (image.get_size() * 0.5)
-		rect.position = $CollisionShape2D.position - (rect.size * 0.5)
-		destination_box = Rect2(rect.position + rect.size * 0.25, rect.size * 0.5)
+		if has_node("CollisionShape2D"):
+			rect = Letters.get_letter_rect(letter)
+			radius = max(rect.size.x, rect.size.y) * 0.5
+			var shape: = CapsuleShape2D.new()
+			var min_dimension: = min(rect.size.x, rect.size.y)
+			shape.radius = min_dimension * 0.5
+			if rect.size.y > rect.size.x:
+				shape.height = max(rect.size.y - min_dimension, 0.0)
+			else:
+				shape.height = max(rect.size.x - min_dimension, 0.0)
+				$CollisionShape2D.rotation_degrees = 90.0
+			$CollisionShape2D.shape = shape
+			$CollisionShape2D.position = rect.position + (rect.size * 0.5) - ($Sprite.texture.get_size() * 0.5)
+			rect.position = $CollisionShape2D.position - (rect.size * 0.5)
+			destination_box = Rect2(rect.position + rect.size * 0.25, rect.size * 0.5)
 
 
 func global_destination_box():

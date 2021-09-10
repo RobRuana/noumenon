@@ -7,6 +7,7 @@ func _ready():
 
 func _unhandled_input(event):
 	if event.is_action_released("debug_restart"):
+		Events.reset_once()
 		get_tree().reload_current_scene()
 
 	elif event.is_action_released("debug_timescale_up"):
