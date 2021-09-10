@@ -47,16 +47,35 @@ func reset_focus(grab_focus: bool = true, animated: bool = false):
 	grab_focus()
 
 
+func get_first_visible(controls: Array):
+	if controls:
+		for control in controls:
+			if control.visible:
+				return control
+	return null
+
+
+func get_last_visible(controls: Array):
+	if controls:
+		for i in range(controls.size()):
+			var control = controls[-(i + 1)]
+			if control.visible:
+				return control
+	return null
+
+
 func wrap_focus_neighbours(controls: Array):
-	if controls.size() > 1:
-		if not controls[0].focus_neighbour_top:
-			controls[0].focus_neighbour_top = controls[-1].get_path()
-		if not controls[0].focus_previous:
-			controls[0].focus_previous = controls[-1].get_path()
-		if not controls[-1].focus_neighbour_bottom:
-			controls[-1].focus_neighbour_bottom = controls[0].get_path()
-		if not controls[-1].focus_next:
-			controls[-1].focus_next = controls[0].get_path()
+	var first = get_first_visible(controls)
+	var last = get_last_visible(controls)
+	if first and last and first != last:
+		if not first.focus_neighbour_top:
+			first.focus_neighbour_top = last.get_path()
+		if not first.focus_previous:
+			first.focus_previous = last.get_path()
+		if not last.focus_neighbour_bottom:
+			last.focus_neighbour_bottom = first.get_path()
+		if not last.focus_next:
+			last.focus_next = first.get_path()
 
 
 func did_push_screen():
