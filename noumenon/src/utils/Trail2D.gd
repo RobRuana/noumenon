@@ -75,7 +75,7 @@ func _notification(p_what: int):
 			self.trail_length = 0
 
 
-func _process(_delta: float):
+func _physics_process(_delta: float):
 	if not disabled and target:
 		match persistence:
 			Persistence.OFF:

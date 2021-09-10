@@ -4,14 +4,14 @@ const RECT_ZERO: Rect2 = Rect2(0.0, 0.0, 0.0, 0.0)
 const TEXTURE_FLAG_FILTER = 4  # from visual_server.h in godot
 
 
-static func get_display_size(sprite: Sprite) -> Vector2:
+func get_display_size(sprite: Sprite) -> Vector2:
 	if sprite.region_enabled:
 		return sprite.region_rect.size
 	else:
 		return Vector2(sprite.texture.get_width(), sprite.texture.get_height())
 
 
-static func is_invisible(image: Image, min_alpha: float = 0.0) -> bool:
+func is_invisible(image: Image, min_alpha: float = 0.0) -> bool:
 	if is_zero_approx(min_alpha):
 		return image.is_invisible()
 
@@ -26,7 +26,7 @@ static func is_invisible(image: Image, min_alpha: float = 0.0) -> bool:
 	return true
 
 
-static func save_stex(image: Image, save_path: String, filter: bool = false) -> int:
+func save_stex(image: Image, save_path: String, filter: bool = false) -> int:
 	var pngdata: PoolByteArray = image.save_png_to_buffer()
 	var pnglen: int = pngdata.size()
 
@@ -64,7 +64,7 @@ static func save_stex(image: Image, save_path: String, filter: bool = false) -> 
 	return err
 
 
-static func image_from_texture(texture: Texture, region: Rect2 = RECT_ZERO) -> Image:
+func image_from_texture(texture: Texture, region: Rect2 = RECT_ZERO) -> Image:
 #	var image: Image = Image.new()
 	var texture_image: Image = texture.get_data()
 	if region != RECT_ZERO:
@@ -102,14 +102,14 @@ static func image_from_texture(texture: Texture, region: Rect2 = RECT_ZERO) -> I
 #	return image
 
 
-static func image_texture_from_texture(texture: Texture, region: Rect2 = RECT_ZERO) -> ImageTexture:
+func image_texture_from_texture(texture: Texture, region: Rect2 = RECT_ZERO) -> ImageTexture:
 	var image: Image = image_from_texture(texture, region)
 	var image_texture: ImageTexture = ImageTexture.new()
 	image_texture.create_from_image(image, 0)
 	return image_texture
 
 
-static func image_from_sprite(sprite: Sprite, region: Rect2 = RECT_ZERO) -> Image:
+func image_from_sprite(sprite: Sprite, region: Rect2 = RECT_ZERO) -> Image:
 	var sprite_region: Rect2 = sprite.region_rect if sprite.region_enabled else RECT_ZERO
 	var texture_region: Rect2 = Rect2(sprite_region.position + region.position, region.size)
 	if texture_region != RECT_ZERO:
@@ -118,13 +118,13 @@ static func image_from_sprite(sprite: Sprite, region: Rect2 = RECT_ZERO) -> Imag
 	return image_from_texture(sprite.texture, texture_region)
 
 
-static func image_texture_from_sprite(sprite: Sprite, region: Rect2 = RECT_ZERO) -> ImageTexture:
+func image_texture_from_sprite(sprite: Sprite, region: Rect2 = RECT_ZERO) -> ImageTexture:
 	var sprite_region: Rect2 = sprite.region_rect if sprite.region_enabled else RECT_ZERO
 	var texture_region: Rect2 = Rect2(sprite_region.position + region.position, region.size)
 	return image_texture_from_texture(sprite.texture, texture_region)
 
 
-static func adjust_alpha(image: Image, percent: float) -> Image:
+func adjust_alpha(image: Image, percent: float) -> Image:
 	var dst_image: Image = Image.new()
 	dst_image.create(image.get_width(), image.get_height(), image.has_mipmaps(), image.get_format())
 	dst_image.lock()
@@ -139,7 +139,7 @@ static func adjust_alpha(image: Image, percent: float) -> Image:
 	return dst_image
 
 
-static func render_sprite_to_image(
+func render_sprite_to_image(
 	src: Sprite,
 	dst: Image,
 	src_rect: Rect2 = RECT_ZERO,
@@ -198,20 +198,20 @@ static func render_sprite_to_image(
 	return dst
 
 
-static func get_shader_param(material: Material, name: String, default_value):
+func get_shader_param(material: Material, name: String, default_value):
 	var value = material.get_shader_param(name)
 	if value == null:
 		return default_value
 	return value
 
 
-static func get_pixelv_alpha(tex: Image, uv: Vector2) -> float:
+func get_pixelv_alpha(tex: Image, uv: Vector2) -> float:
 	if uv.x < 0.0 or uv.y < 0.0 or uv.x >= tex.get_width() or uv.y >= tex.get_height():
 		return 0.0
 	return tex.get_pixelv(uv).a
 
 
-static func get_outline_color(
+func get_outline_color(
 	tex: Image,
 	uv: Vector2,
 	sample_color: Color,
@@ -249,7 +249,7 @@ static func get_outline_color(
 	return final_color
 
 
-static func color_glow(color: Color, glow: float) -> Color:
+func color_glow(color: Color, glow: float) -> Color:
 	return Color.from_hsv(
 		color.h,
 		color.s,
@@ -258,7 +258,7 @@ static func color_glow(color: Color, glow: float) -> Color:
 	)
 
 
-static func swap_color(
+func swap_color(
 	tex: Image,
 	uv: Vector2,
 	outline_color: Color = Color.black,
